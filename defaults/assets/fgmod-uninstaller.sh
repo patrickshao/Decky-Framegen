@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -x
-exec > >(tee -i /tmp/fgmod-uninstaller.log) 2>&1
 
 error_exit() {
   echo " $1"
@@ -103,78 +101,6 @@ cd "$exe_folder_path" || error_exit "Failed to change directory to $exe_folder_p
 
 logger -t fgmod-uninstaller "Uninstalling from: $exe_folder_path"
 
-# === Remove OptiScaler Files ===
-echo " Removing OptiScaler files..."
-rm -f "OptiScaler.dll" "dxgi.dll" "winmm.dll" "dbghelp.dll" "version.dll" "wininet.dll" "winhttp.dll" "OptiScaler.asi"
-rm -f "OptiScaler.ini" "OptiScaler.log"
-
-# === Remove Nukem FG Mod Files ===
-echo " Removing Nukem FG Mod files..."
-rm -f "dlssg_to_fsr3_amd_is_better.dll" "dlssg_to_fsr3.ini" "dlssg_to_fsr3.log"
-rm -f "nvapi64.dll" "fakenvapi.ini" "fakenvapi.log"
-
-# === Remove Supporting Libraries ===
-echo " Removing supporting libraries..."
-rm -f "nvngx.dll" "nvngx.ini" "amdxcffx64.dll" "amdxc64.dll"
-# Only remove files if backups exist (to avoid removing restored originals)
-[[ -f "libxess.dll.b" ]] && rm -f "libxess.dll"
-[[ -f "libxess_dx11.dll.b" ]] && rm -f "libxess_dx11.dll"
-[[ -f "libxess_fg.dll.b" ]] && rm -f "libxess_fg.dll"
-[[ -f "libxell.dll.b" ]] && rm -f "libxell.dll"
-[[ -f "amd_fidelityfx_dx12.dll.b" ]] && rm -f "amd_fidelityfx_dx12.dll"
-[[ -f "amd_fidelityfx_framegeneration_dx12.dll.b" ]] && rm -f "amd_fidelityfx_framegeneration_dx12.dll"
-[[ -f "amd_fidelityfx_upscaler_dx12.dll.b" ]] && rm -f "amd_fidelityfx_upscaler_dx12.dll"
-[[ -f "amdxcffx64.dll.b" ]] && rm -f "amdxcffx64.dll"
-[[ -f "amdxc64.dll.b" ]] && rm -f "amdxc64.dll"
-[[ -f "amd_fidelityfx_vk.dll.b" ]] && rm -f "amd_fidelityfx_vk.dll"
-
-# === Remove FG Mod Files ===
-echo " Removing frame generation mod files..."
-rm -f "dlssg_to_fsr3_amd_is_better.dll" "dlssg_to_fsr3.ini"
-
-# === Remove NVAPI Files (Current and Legacy) ===
-echo " Removing NVAPI files..."
-rm -f "fakenvapi.dll" "fakenvapi.ini"  # v0.9.0-final
-rm -f "nvapi64.dll" "nvapi64.dll.b"    # Legacy cleanup for older versions and backups
-
-# === Remove ASI Plugins ===
-echo " Removing ASI plugins directory..."
-rm -rf "plugins"
-
-# === Remove D3D12_Optiscaler directory (required by v0.9.0-final) ===
-rm -rf "D3D12_Optiscaler"
-
-# === Remove Legacy Files ===
-echo " Removing legacy files..."
-rm -f "dlss-enabler.dll" "dlss-enabler-upscaler.dll" "dlss-enabler.log"
-rm -f "nvngx-wrapper.dll" "_nvngx.dll"
-rm -f "dlssg_to_fsr3_amd_is_better-3.0.dll"
-
-# === Restore Original DLLs ===
-echo " Restoring original DLLs..."
-restorable_dlls=("dxgi.dll" "winmm.dll" "dbghelp.dll" "version.dll" "wininet.dll" "winhttp.dll" "OptiScaler.asi" "d3dcompiler_47.dll" "amd_fidelityfx_dx12.dll" "amd_fidelityfx_framegeneration_dx12.dll" "amd_fidelityfx_upscaler_dx12.dll" "amdxcffx64.dll" "amdxc64.dll" "amd_fidelityfx_vk.dll" "libxess.dll" "libxess_dx11.dll" "libxess_fg.dll" "libxell.dll")
-for dll in "${restorable_dlls[@]}"; do
-  if [[ -f "${dll}.b" ]]; then
-    mv "${dll}.b" "$dll"
-    echo " Restored original $dll"
-    logger -t fgmod-uninstaller "Restored original $dll"
-  fi
-done
-
-# === Self-remove uninstaller ===
-echo " Removing uninstaller..."
-rm -f "fgmod-uninstaller.sh"
-
-echo " fgmod removed from this game successfully!"
-logger -t fgmod-uninstaller "fgmod removed from $exe_folder_path"
-
-# === Execute original command if provided ===
-if [[ $# -gt 1 ]]; then
-  echo " Launching the game..."
-  export SteamDeck=0
-  export WINEDLLOVERRIDES="${WINEDLLOVERRIDES},dxgi=n,b"
-  exec >/dev/null 2>&1
-  exec "$@"
-else
-  echo " Uninstallation complete. No game specified to run."
-fi
+python_bin="$(command -v python3 || command -v python || true)"
+[[ -n "$python_bin" ]] || error_exit "Python 3 is required"
+"$python_bin" "$HOME/fgmod/patch-game.py" unpatch "$exe_folder_path" || error_exit "OptiScaler removal failed"

@@ -61,29 +61,19 @@ export const DEFAULT_PROXY_DLL: ProxyDllValue = "dxgi.dll";
 
 export const FSR4_VARIANT_OPTIONS = [
   {
-    value: "rdna23-int8",
-    label: "4.0.2c | RDNA2/3 Compatibility",
-    hint: "Older compatible runtime for RDNA2/3. In most cases, use the Valve 4.1.1 path for RDNA2 or the regular 4.1.1 driver override.",
+    value: "fsr4-lite",
+    label: "FSR 4.1.2 | INT8 Lite (handhelds)",
+    hint: "Selects the smaller INT8 Lite model for handheld APUs, including Legion Go S. Requires a supported game and current Proton. Verify INT8 Lite in the in-game overlay.",
   },
   {
-    value: "rdna4-native",
-    label: "4.1.1 | FFX 2.3 SDK",
-    hint: "Uses OptiScaler 0.9.4's bundled FSR4.1.1 SDK upscaler. Official FSR4 support is RDNA4 (FP8) and RDNA3 desktop GPUs (INT8).",
-  },
-  {
-    value: "rdna34-official-411",
-    label: "4.1.1 | Driver Override",
-    hint: "Uses the final bundled FSR4.1.1 SDK upscaler plus the separately bundled 4.1.1 amdxcffx64.dll driver override.",
-  },
-  {
-    value: "rdna2-valve-411-pre10",
-    label: "4.1.1 | Valve RDNA2 Compatibility",
-    hint: "Uses the final bundled FSR4.1.1 SDK upscaler with the existing pre10 injector, Valve 4.1.1 amdxcffx64.dll, amdxc64.dll, and RDNA2-specific INI overrides.",
+    value: "fsr4-auto",
+    label: "FSR 4 | Automatic model",
+    hint: "Lets upstream OptiScaler select the model supported by your GPU. Unsupported combinations may fall back to FSR 3.",
   },
 ] as const;
 
 export type Fsr4VariantValue = typeof FSR4_VARIANT_OPTIONS[number]["value"];
-export const DEFAULT_FSR4_VARIANT: Fsr4VariantValue = "rdna23-int8";
+export const DEFAULT_FSR4_VARIANT: Fsr4VariantValue = "fsr4-lite";
 
 // Common timeout values
 export const TIMEOUTS = {
@@ -102,5 +92,5 @@ export const MESSAGES = {
   installSuccess: "OptiScaler mod setup successfully!",
   uninstallSuccess: "OptiScaler mod removed successfully.",
   instructionTitle: "How to Use:",
-  instructionText: "Use 'Copy launch options' for the standard direct launch-options method. If you want the wrapper commands instead, enable Manual Mode to reveal 'Copy Patch Command' and 'Copy Unpatch Command'.\n\nIn-game: Enable DLSS in graphics settings to unlock FSR 3.1/XeSS 2.0 in DirectX12 Games.\n\nFor extended OptiScaler options, assign a back button to a keyboard's 'Insert' key."
+  instructionText: "Use 'Copy launch options' for the standard direct launch-options method. If you want the wrapper commands instead, enable Manual Mode to reveal 'Copy Patch Command' and 'Copy Unpatch Command'.\n\nIn-game: Enable DLSS in graphics settings to use the selected upscaler in supported games.\n\nFor extended OptiScaler options, assign a back button to a keyboard's 'Insert' key."
 };

@@ -1,0 +1,58 @@
+{
+  "optiscaler": {
+    "name": "OptiScaler_v10.0.0-pre1_20261024.7z",
+    "version": "10.0.0-pre1.20261024",
+    "url": "https://github.com/optiscaler/OptiScaler-nightly/releases/download/nightly-20261024/OptiScaler_v10.0.0-pre1_20261024.7z",
+    "sha256": "74f20189e0ec76288c86d69057b3feb4750f4680118a9852fb743b343274ac1d",
+    "upscaler_sha256": "d0dcccc74a43c44ba435b7a369b456e0970d8a4464e4bd683119b374f2c9fb46"
+  },
+  "amd_driver": {
+    "name": "whql-amd-software-adrenalin-edition-26.10.1-win11-b.exe",
+    "version": "26.10.1",
+    "url": "https://drivers.amd.com/drivers/whql-amd-software-adrenalin-edition-26.10.1-win11-b.exe",
+    "sha256": "54c208a93ea778340036439df074b637b6ec4ac7d91a2db579fa748915f19d89",
+    "archive_offset": 1785344,
+    "files": {
+      "amdvkffx64.dll": {
+        "member": "Packages/Drivers/Display/WT6A_INF/B026676/amdvkffx64.dll",
+        "sha256": "80e761f7c8c0ec8ead7b321df01911baaf917defae51388d29eaecb1d6bc58bd"
+      },
+      "amdxcffx64.dll": {
+        "member": "Packages/Drivers/Display/WT6A_INF/B026676/amdxcffx64.dll",
+        "sha256": "c33a287f3048bf02311cae430b6a977500b94ca7b315cd7bff751e6b03e483e3"
+      }
+    }
+  },
+  "optipatcher": {
+    "name": "OptiPatcher_rolling.asi",
+    "version": "0.42-b3f8c1b821db739963625ee0767d2d7df9ace0b5",
+    "url": "https://github.com/optiscaler/OptiPatcher/releases/download/rolling/OptiPatcher.asi",
+    "sha256": "25efc663509f92b736427377bceafbb7208da6402621f07be03e5a46bf1b564c"
+  },
+  "variants": {
+    "fsr4-lite": {
+      "label": "FSR 4.1.2 | INT8 Lite (handhelds)",
+      "config_overrides": {
+        "Upscalers.Dx12Upscaler": "ffx",
+        "Upscalers.Dx11Upscaler": "ffx_12",
+        "Upscalers.VulkanUpscaler": "ffx_12",
+        "FSR.Fsr4GpuSupport": "4",
+        "FSR.Fsr4Model": "3",
+        "FSR.UpscalerIndex": "0",
+        "Libraries.OptiDllPath": ".\\OptiScaler"
+      }
+    },
+    "fsr4-auto": {
+      "label": "FSR 4 | Automatic model",
+      "config_overrides": {
+        "Upscalers.Dx12Upscaler": "ffx",
+        "Upscalers.Dx11Upscaler": "ffx_12",
+        "Upscalers.VulkanUpscaler": "ffx_12",
+        "FSR.Fsr4GpuSupport": "auto",
+        "FSR.Fsr4Model": "auto",
+        "FSR.UpscalerIndex": "0",
+        "Libraries.OptiDllPath": ".\\OptiScaler"
+      }
+    }
+  }
+}
