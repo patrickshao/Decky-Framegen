@@ -1,100 +1,83 @@
-# Decky Framegen Plugin
+# Decky Framegen — FSR 4 Lite
 
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/B0B71HZTAX)
+An independently maintained update of [Decky-Framegen](https://github.com/xXJSONDeruloXx/Decky-Framegen)
+for FSR 4.1.2 INT8 Lite on SteamOS handhelds, targeting the Legion Go S.
+It installs and configures upstream OptiScaler per game through Decky Loader.
+This fork is not an official AMD or OptiScaler product.
 
-A Steam Deck plugin that enables DLSS upscaling and Frame Generation on handhelds by utilizing the latest OptiScaler and supporting modification software. This plugin automatically installs and manages all necessary components for FSR-based frame generation in games that support DLSS, or OptiFG for adding FG to games that do not have any existing FG pathway (highly experimental)
+## Install on Legion Go S
 
-## What This Plugin Does
+1. If a game is patched with an older Framegen version, **unpatch it with that version first**.
+   v10 uses a different library layout; this build refuses to guess ownership of older files.
+2. In Decky settings, enable Developer Mode and install the ZIP from this repository's
+   [releases](https://github.com/patrickshao/Decky-Framegen/releases).
+3. Open the plugin and choose **Setup OptiScaler Mod**. The binaries are bundled; setup works offline.
+4. Leave **Default FSR4 runtime** at **FSR 4.1.2 | INT8 Lite (handhelds)**.
+5. Close the game, select it in the plugin and apply the patch/launch options.
+6. Launch with a current Proton build and select a supported upscaler input in the game
+   (DLSS, XeSS or FSR, depending on the game's OptiScaler compatibility entry).
+7. Bind a rear button to **Insert** to open OptiScaler. Confirm the active provider/version,
+   **INT8 Lite** model and FSR4 watermark. The installed SDK DLL may still say 4.1.1;
+   the 4.1.2 Lite model comes from the AMD Vulkan driver provider.
 
-This plugin uses OptiScaler to replace DLSS calls with FSR3/FSR3.1, giving you:
+Compatibility depends on the game, Proton and Mesa. Start with a supported DX12 game.
+An FSR4 watermark alone does not prove that Lite was selected; inspect the model too.
+Compare base frame rate and motion quality in the same scene. This build has been tested
+for packaging and file installation on a desktop, **not GPU-validated on a Legion Go S**.
+Do not inject mods into games whose anti-cheat forbids them.
 
-- **Frame Generation**: Smooth out your frame rate using AMD's FSR3 pathways
-- **Upscaling**: Improves performance while maintaining visual quality using FSR and XESS using DLSS FSR or XESS inputs. Upgrade FSR 2 games to FSR 3.1.4 or XESS for better visual quality.
-- **Easy Management**: One-click installation and game patching/unpatching through the Steam Deck interface. No going into desktop mode every time you want to add or remove OptiScaler from a game!
+Lite changes **upscaling**. Upstream frame-generation defaults are retained; enable and test
+frame generation separately in OptiScaler if desired. The Automatic model preset clears the
+Lite override; it may fall back to FSR3 on unsupported combinations.
 
-## Features
+## Remove or change a patch
 
-### Core Functionality
-- **One-Click Setup**: Automatically downloads and installs OptiScaler into a "fgmod" directory
-- **Smart Installation**: Handles all required dependencies and library files
-- **Game Patching**: Easy copy-paste launch commands for enabling/disabling the mod per game
-- **OptiScaler Wiki**: Direct access to OptiScaler documentation and settings via a webpage launch button right inside the plugin.
+Close the game and use its **Unpatch** button before removing the plugin.
+Original displaced files are restored, and unrelated ASI plugins are retained.
+A per-game manifest records exactly which files belong to this build. If a managed DLL
+has been changed outside the plugin, removal stops so you can preserve that modification.
 
-## How to Use
+The default preset controls future patches. Repatch an existing game to change its preset.
+For manual/Heroic installs, enable Manual Mode and use the wrapper commands. The wrapper
+and Decky use the same installer. `DLL=winmm.dll` selects a different proxy;
+`FGMOD_FSR4_VARIANT=fsr4-auto` selects automatic model detection.
+INI environment overrides are supported by the launch wrapper, for example:
 
-1. **Install the Plugin**: Download and install through Decky Loader "install from zip" option in developer settings
-2. **Setup OptiScaler**: Open the plugin and click "Setup OptiScaler Mod" 
-3. **Configure Games**: For each game you want to enhance:
-   - Click "Copy launch options" in the plugin for the standard direct launch-options method
-   - Go to your game's Properties → Launch Options in Steam
-   - Paste the copied command
-   - If you want the wrapper commands instead, enable Manual Mode and use "Copy Patch Command" / "Copy Unpatch Command"
-4. **Enable Features**: Launch your game and enable DLSS in the graphics settings
-5. **Advanced Options**: Press the Insert key in-game for additional OptiScaler settings
-
-### Removing the Mod from Games
-- If you used the wrapper method, enable Manual Mode and click "Copy Unpatch Command", then replace the launch options with: `~/fgmod/fgmod-uninstaller.sh %command%`
-- If you used the standard direct patch flow, use the in-plugin unpatch button instead
-- Run the game at least once to make the uninstaller script run. After that you can leave the launch option or remove it
-
-### Configuring OptiScaler via Environment Variables
-As of v0.15.1, you can update OptiScaler settings before a game launches by adding environment variables. 
-This is useful if you plan to use the same settings across multiple games so they are pre-configured by the time you launch them.
-
-For example, considering the following sample from the OptiScaler.ini config file:
-```
-[Upscalers]
-Dx11Upscaler=auto
-Dx12Upscaler=auto
-VulkanUpscaler=auto
-
-[FrameGen]
-Enabled=auto
-FGInput=auto
-FGOutput=auto
-DebugView=auto
-DrawUIOverFG=auto
-```
-We can decide to set `Dx12Upscaler=fsr31` to enable FSR4 in DX12 games by default. This works because the option name `Dx12Upscaler` is unique throughout the file but for options that appear multiple times like `Enabled`, you can prefix the option name with the section name like `FrameGen_Enabled=true`.
-You can provide section names for all options if you want to be explicit. You can also prefix `Section_Option` with `OptiScaler` to ensure no conflict with other commands.
-
-Here's the breakdown of supported formats:
-- `OptiScaler_Section_Option=value` - Full format (foolproof)
-- `Section_Option=value` - Short format (recommended)
-- `Option=value` - Minimal format (only works if the option name appears once in OptiScaler.ini)
-
-**Example:**
-```bash
-# Enable frame generation with XeFG output
-FrameGen_Enabled=true FGInput=fsrfg FGOutput=xefg ~/fgmod/fgmod %command%
-
-# Set DX12 upscaler to FSR 3.1 (Upgrades to FSR4)
-Dx12Upscaler=fsr31 ~/fgmod/fgmod %command%
+```sh
+FSR_Fsr4EnableWatermark=true ~/fgmod/fgmod %command%
 ```
 
-**Notes:**
-- Environment variables override the OptiScaler.ini file on each game launch
-- Hyphenated section names like `[V-Sync]` can be accessed like `VSync_Option=value`
-- If an option name appears in multiple sections of the OptiScaler.ini file, use the `Section_Option` or `OptiScaler_Section_Option` format
-- OptiScaler 0.9.4 adds `FSR_Fsr4ForceEnableInt8=true` for the bundled SDK upscaler. It can force INT8 on unsupported GPUs that support INT8, but does not make older non-INT8 hardware compatible and does not affect the `amdxcffx64.dll` driver override. Enable `FSR_Fsr4EnableWatermark=true` to verify the active FSR runtime.
+## Sources and builds
 
-### Choosing an FSR4 Runtime
+All runtime dependencies are pinned in [runtime-assets.json](defaults/assets/runtime-assets.json):
 
-- **4.1.1 FFX 2.3 SDK**: The upstream 0.9.4 bundled path. Official FSR4 support is RDNA4 (FP8) and RDNA3 desktop GPUs (INT8); it is the only bundled path affected by `Fsr4ForceEnableInt8`.
-- **4.1.1 Valve RDNA2 Compatibility**: The RDNA2 compatibility option. It uses the final SDK upscaler with the Valve `amdxcffx64.dll`, `amdxc64.dll`, the pre10 OptiScaler injector, and RDNA2-specific INI overrides.
-- **4.1.1 Driver Override**: Uses the same final SDK upscaler plus a separate `amdxcffx64.dll` AMD driver provider. It is a fallback/testing path and is not bundled by upstream 0.9.4.
-- **4.0.2c RDNA2/3 Compatibility**: Older compatibility runtime. Prefer the Valve 4.1.1 path for RDNA2 or the regular 4.1.1 driver override when those work for the game.
+- Official **OptiScaler v10 prerelease, 2026-10-24** from the OptiScaler team's nightly repository.
+- Unmodified `amdvkffx64.dll` and `amdxcffx64.dll`, extracted from **AMD Adrenalin 26.10.1**
+  downloaded directly from AMD. The Windows driver installer is **never executed**.
+- Official **OptiPatcher v0.42** rolling snapshot, pinned by SHA-256.
 
-FSR 4.1.1 can fall back internally to FSR3 on unsupported hardware. Check the FSR4 watermark (`FSR4`, `FSR4-i8`, or `FSR3`) after changing a runtime to confirm the active path.
+No custom live-control ASI or repacked OptiScaler injector is included. Runtime installation
+has no network downloader. The build downloader verifies TLS and rejects changed hashes.
+See [runtime provenance](docs/runtime-provenance.md) for verification and update details.
 
-## Technical Details
+Build with Python 3.9+, Node.js 22+, pnpm 10.28.2 and bsdtar/libarchive (included on SteamOS
+and macOS; on Ubuntu use the distribution's `libarchive-tools` package):
 
-### What's Included
-- **[OptiScaler 0.9.4](https://github.com/optiscaler/OptiScaler/releases/tag/v0.9.4)**: Official upstream final bundle with the FFX 2.3 SDK / FSR4.1.1. The plugin retains its separately bundled FSR4.0.2c compatibility runtime and existing 4.1.1 driver-override variants; the final upstream archive itself does not include those driver-override DLLs.
-- **Nukem9's DLSSG to FSR3 mod**: Allows use of DLSS inputs for FSR frame gen outputs, and xess or FSR upscaling outputs
-- **FakeNVAPI**: NVIDIA API emulation for AMD/Intel GPUs, to make DLSS options selectable in game
-- **Supporting Libraries**: All required DX12/Vulkan libraries (libxess.dll, amd_fidelityfx, etc.)
+```sh
+pnpm install --frozen-lockfile --ignore-scripts
+python3 scripts/fetch_assets.py
+python3 -m unittest discover -s tests -v
+pnpm exec tsc --noEmit
+pnpm build
+python3 scripts/package.py
+```
 
+The first asset fetch downloads AMD's approximately 1 GB driver package temporarily;
+only the two verified DLLs are retained. You can reuse an already downloaded exact package
+with `python3 scripts/fetch_assets.py --amd-package /path/to/installer.exe`.
+Output: `out/Decky-Framegen-0.18.0.zip` and its `.sha256` file. The ZIP includes only the
+locally built frontend, source backend, launcher assets and explicitly verified binaries.
+GitHub Actions repeats the build and publishes an artifact with the checksum.
 
 ## Credits
 
