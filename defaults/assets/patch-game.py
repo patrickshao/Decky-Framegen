@@ -101,10 +101,19 @@ def transact(target, writes, removals):
                 shutil.copy2(path, snapshot)
                 undo[name] = snapshot
         try:
+            # Persist originals before replacing them. On removal, restore the
+            # original before deleting its backup; commit the state file last.
+            ordered = sorted(writes, key=lambda name: 0 if name.startswith(BACKUPS + "/") else 1)
+            for name in ordered:
+                if name != STATE:
+                    atomic_write(paths[name], writes[name])
             for name in removals:
-                paths[name].unlink(missing_ok=True)
-            for name, data in writes.items():
-                atomic_write(paths[name], data)
+                if name != STATE:
+                    paths[name].unlink(missing_ok=True)
+            if STATE in writes:
+                atomic_write(paths[STATE], writes[STATE])
+            elif STATE in removals:
+                paths[STATE].unlink(missing_ok=True)
         except Exception:
             for name, path in paths.items():
                 if name in undo:

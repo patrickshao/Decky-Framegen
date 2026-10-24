@@ -136,6 +136,28 @@ class InstallTests(unittest.TestCase):
         self.assertFalse((self.target / game.STATE).exists())
         self.assertFalse((self.target / "OptiScaler/amdvkffx64.dll").exists())
 
+    def test_backups_precede_overwrites_and_survive_until_restore(self):
+        original = b"original game proxy"
+        (self.target / "dxgi.dll").write_bytes(original)
+        write = game.atomic_write
+
+        def observe_patch(path, data):
+            if path == self.target / "dxgi.dll":
+                self.assertEqual((self.target / game.BACKUPS / "dxgi.dll").read_bytes(), original)
+            write(path, data)
+
+        with mock.patch.object(game, "atomic_write", side_effect=observe_patch):
+            self.patch()
+
+        def observe_restore(path, data):
+            if path == self.target / "dxgi.dll":
+                self.assertEqual((self.target / game.BACKUPS / "dxgi.dll").read_bytes(), original)
+                self.assertTrue((self.target / game.STATE).is_file())
+            write(path, data)
+
+        with mock.patch.object(game, "atomic_write", side_effect=observe_restore):
+            game.unpatch(self.target)
+
     def test_legacy_install_is_not_destructively_migrated(self):
         (self.target / game.MARKER).write_text("{}")
         (self.target / "dxgi.dll.b").write_bytes(b"game original")
