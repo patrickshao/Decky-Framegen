@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import decky
 import configparser
-import sys
 import tempfile
 import os
 import subprocess
@@ -419,11 +418,19 @@ class Plugin:
         return target
 
     def _game_file_action(self, action: str, directory: Path, *arguments: str) -> dict:
+        # Decky's frozen sys.executable is PluginLoader, not a Python interpreter.
+        # Running it here starts another loader, which can restart Steam's UI.
+        clean_env = os.environ.copy()
+        clean_env.pop("LD_LIBRARY_PATH", None)
+        if "LD_LIBRARY_PATH_ORIG" in clean_env:
+            clean_env["LD_LIBRARY_PATH"] = clean_env["LD_LIBRARY_PATH_ORIG"]
+        decky.logger.info(f"[Framegen] game file action start: action={action} target={directory}")
         result = subprocess.run(
-            [sys.executable, str(ASSETS_DIR / "patch-game.py"), action, str(directory),
+            ["/usr/bin/python3", "-I", str(ASSETS_DIR / "patch-game.py"), action, str(directory),
              "--bundle", str(Path(decky.HOME) / "fgmod"), *arguments],
-            capture_output=True, text=True, timeout=600, check=False,
+            capture_output=True, text=True, timeout=600, check=False, env=clean_env,
         )
+        decky.logger.info(f"[Framegen] game file action finished: action={action} returncode={result.returncode}")
         try:
             return json.loads(result.stdout)
         except (ValueError, TypeError):
