@@ -75,6 +75,8 @@ export const FSR4_VARIANT_OPTIONS = [
 export type Fsr4VariantValue = typeof FSR4_VARIANT_OPTIONS[number]["value"];
 export const DEFAULT_FSR4_VARIANT: Fsr4VariantValue = "fsr4-lite";
 
+export const PLUGIN_UPDATE_URL = "https://github.com/patrickshao/Decky-Framegen/releases/download/latest-preview/Decky-Framegen-latest.zip";
+
 // Common timeout values
 export const TIMEOUTS = {
   resultDisplay: 5000,  // 5 seconds
