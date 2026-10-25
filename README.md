@@ -75,7 +75,7 @@ python3 scripts/package.py
 The first asset fetch downloads AMD's approximately 1 GB driver package temporarily;
 only the two verified DLLs are retained. You can reuse an already downloaded exact package
 with `python3 scripts/fetch_assets.py --amd-package /path/to/installer.exe`.
-Output: `out/Decky-Framegen-0.18.0.zip` and its `.sha256` file. The ZIP includes only the
+Output: `out/Decky-Framegen-0.18.1.zip` and its `.sha256` file. The ZIP includes only the
 locally built frontend, source backend, launcher assets and explicitly verified binaries.
 GitHub Actions repeats the build and publishes an artifact with the checksum.
 
