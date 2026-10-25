@@ -6,6 +6,7 @@ import { OptiScalerControls } from "./components";
 import { checkFGModPath } from "./api";
 import { safeAsyncOperation } from "./utils";
 import { TIMEOUTS } from "./utils/constants";
+import { PluginUpdates } from "./components/PluginUpdates";
 
 type FgmodInfo = {
   exists: boolean;
@@ -43,6 +44,7 @@ function MainContent() {
         setPathExists={setPathExists}
         fgmodInfo={fgmodInfo}
       />
+      <PluginUpdates />
       {pathExists === true ? (
         <>
           {/* <InstalledGamesSection /> */}
